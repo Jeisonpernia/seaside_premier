@@ -60,7 +60,7 @@
               <tree>
                 <field name="date"/>
                 <field name="name"/>
-                <field name="payments"/>
+                <field name="payments" sum="Total Payment/s"/>
                 <field name="sale_order_id" invisible="1"/>
               </tree>
             </field>
@@ -81,7 +81,7 @@
               <tree>
                 <field name="date"/>
                 <field name="name"/>
-                <field name="payments"/>
+                <field name="payments" sum="Total Payment/s"/>
               </tree>
             </field>
           </page>
