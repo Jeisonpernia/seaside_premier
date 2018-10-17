@@ -7,7 +7,6 @@
             - Types of Membership. Inclusion of Exclusive types where only a number of people can avail
             - Month-based Payment Terms with monthly recurring breakdown of payment in Sales and Invoice
             - Miscellaneous and Interest rates entered by the User using a pop-up window
-            - Allow Other Salesperson/s to see a Partner/Customer
     """,
     'author': "Earvin Clyde Gatdula - Agilis Enterprise Solutions, Inc.",
     'website': "http://www.agilis-solutions.com/",
@@ -15,7 +14,7 @@
     'version': '0.1',
 
     'depends': [
-        'sale_management', 'account_invoicing', 'contacts'
+        'sale_management', 'account_invoicing'
         ],
 
     'data': [
