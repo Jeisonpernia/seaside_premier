@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
   <data>
-
+    
+    <!-- Res Partner Form Inherit -->
+    <record id="sale_membership_res_partner_form_view_inherit" model="ir.ui.view">
+      <field name="name">sale.membership.res.partner.inherit.form</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form"/>
+      <field name="arch" type="xml">
+        <field name="user_id" position="after">
+          <field name="allow_salesperson" widget="many2many_tags"/>
+        </field>
+      </field>
+    </record>
+    
     <!-- Product Template Form Inherit -->
     <record id="sale_membership_product_template_form_view_inherit" model="ir.ui.view">
       <field name="name">sale.membership.product.template.inherit.form</field>
