@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <data>
+    
+    <!-- Res Partner Form Inherit -->
+    <record id="sale_membership_res_partner_form_view_inherit" model="ir.ui.view">
+      <field name="name">sale.membership.res.partner.inherit.form</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form"/>
+      <field name="arch" type="xml">
+        <field name="user_id" position="after">
+          <field name="allow_salesperson" widget="many2many_tags"/>
+        </field>
+      </field>
+    </record>
+    
+    <!-- Product Template Form Inherit -->
+    <record id="sale_membership_product_template_form_view_inherit" model="ir.ui.view">
+      <field name="name">sale.membership.product.template.inherit.form</field>
+      <field name="model">product.template</field>
+      <field name="inherit_id" ref="product.product_template_form_view"/>
+      <field name="arch" type="xml">
+        <div name="options" position="inside">
+          <div>
+            <field name="membership"/>
+            <label for="membership"/>
+          </div>
+        </div>
+        <field name="categ_id" position="after">
+          <field name="limited"/>
+        </field>
+        <group name="group_general" position="after">
+          <group attrs="{'invisible':[('limited','=',False)]}">
+            <field name="limited_max_number" attrs="{'required':[('limited','=',True)]}"/>
+            <field name="limited_current_number"/>
+          </group>
+        </group>
+      </field>
+    </record>
+
+    <!-- Account Payment Term Form Inherit -->
+    <record id="sale_membership_account_payment_term_form_view_inherit" model="ir.ui.view">
+      <field name="name">sale.membership.account.payment.term.inherit.form</field>
+      <field name="model">account.payment.term</field>
+      <field name="inherit_id" ref="account.view_payment_term_form"/>
+      <field name="arch" type="xml">
+        <field name="active" position="after">
+          <field name="number_of_months"/>
+        </field>
+      </field>
+    </record>
+
+    <!-- Sale Order Form Inherit -->
+    <record id="sale_membership_sale_order_form_inherit" model="ir.ui.view">
+      <field name="name">sale.membership.sale.order.inherit.form</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_order_form"/>
+      <field name="arch" type="xml">
+        <field name="payment_term_id" position="attributes">
+          <attribute name="required">1</attribute>
+        </field>
+        <group name="sale_total" position="before">
+          <button name="%(interest_breakdown_wizard_action)d" string="Monthly Breakdown"
+            class="oe_highlight" type="action" />
+        </group>
+        <field name="amount_tax" position="after">
+          <field name="interest_fee"/>
+        </field>
+        <xpath expr="//notebook/page" position="after">
+          <page string="Payment Schedule">
+            <field name="payment_schedule_ids">
+              <tree>
+                <field name="date"/>
+                <field name="name"/>
+                <field name="payments" sum="Total Payment/s"/>
+                <field name="sale_order_id" invisible="1"/>
+              </tree>
+            </field>
+          </page>
+        </xpath>
+      </field>
+    </record>
+
+    <!-- Account Invoice Form Inherit -->
+    <record id="sale_membership_account_invoice_form_inherit" model="ir.ui.view">
+      <field name="name">sale.membership.account.invoice.inherit.form</field>
+      <field name="model">account.invoice</field>
+      <field name="inherit_id" ref="account.invoice_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//notebook/page" position="after">
+          <page string="Payment Schedule">
+            <field name="payment_schedule_ids">
+              <tree>
+                <field name="date"/>
+                <field name="name"/>
+                <field name="payments" sum="Total Payment/s"/>
+              </tree>
+            </field>
+          </page>
+        </xpath>
+      </field>
+    </record>
+
+  </data>
+</odoo>
