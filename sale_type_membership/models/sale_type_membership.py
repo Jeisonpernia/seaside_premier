@@ -7,11 +7,15 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-
 class SaleMembershipResPartner(models.Model):
     _inherit = 'res.partner'
 
-    allow_saleperson = fields.Many2many(string="Allow Salepersons", comodel_name="res.users")
+    allow_salesperson = fields.Many2many(string="Allow Salespersons", comodel_name="res.users")
+    
+    @api.onchange('user_id')
+    def onchange_allow_salesperson(self):
+        if self.user_id:
+            self.allow_salesperson = self.user_id
 
 class SaleMembershipProductTemplate(models.Model):
     _inherit = 'product.template'
