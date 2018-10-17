@@ -7,6 +7,12 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+
+class SaleMembershipResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    allow_saleperson = fields.Many2many(string="Allow Salepersons", comodel_name="res.users")
+
 class SaleMembershipProductTemplate(models.Model):
     _inherit = 'product.template'
 
