@@ -27,9 +27,9 @@
               <label for="add_vat"/>
               <div>
                 <field name="add_vat" class="oe_inline"/>
-                <label for="vat_rate" attrs="{'invisible':[('add_vat','!=',True)]}"/>
-                <field name="vat_rate" attrs="{'invisible':[('add_vat','!=',True)]}"/>
               </div>
+              <field name="tax_id" attrs="{'invisible':[('add_vat','!=',True)]}"/>
+              <field name="vat_rate" attrs="{'invisible':[('add_vat','!=',True)]}"/>
               <field name="vat_type" attrs="{'invisible':[('add_vat','!=',True)]}"/>
               <field name="vat_amount" attrs="{'invisible':[('add_vat','!=',True)]}"/>
               <field name="taxed_interest_fee" attrs="{'invisible':[('add_vat','!=',True)]}"/>
