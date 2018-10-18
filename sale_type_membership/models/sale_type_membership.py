@@ -11,6 +11,7 @@ class SaleMembershipProductTemplate(models.Model):
     _inherit = 'product.template'
 
     membership = fields.Boolean(string="is a Membership Club")
+    is_coupon = fields.Boolean(string="is a Coupon")
     limited = fields.Boolean(string="Limited Members")
     limited_max_number = fields.Integer(string="Maximum Number of Members")
     limited_current_number = fields.Integer(string="Current Number of Members", related="sales_count")
@@ -18,7 +19,30 @@ class SaleMembershipProductTemplate(models.Model):
 class SaleMembershipAccountPaymentTerm(models.Model):
     _inherit = 'account.payment.term'
 
-    number_of_months = fields.Integer(string="Number of Months", required=True, help="if less than a month, put '1'")
+    number_of_months = fields.Integer(string="Number of Months", required=True, default=1, help="if less than a month, put '1'")
+
+class SaleMembershipSaleCouponProgram(models.Model):
+    _inherit = 'sale.coupon.program'
+
+    @api.model
+    def create(self, vals):
+        """This is a copy-pasted override from the Enterprise module sale_coupon.
+            Changes are located inside the discount_line_product_id create() call,
+            added the 'is_coupon' field"""
+        program = super(SaleMembershipSaleCouponProgram, self).create(vals)
+        if not vals.get('discount_line_product_id', False):
+            discount_line_product_id = self.env['product.product'].create({
+                'name': program.reward_id.name_get()[0][1],
+                'type': 'service',
+                'is_coupon':True,
+                'taxes_id': False,
+                'supplier_taxes_id': False,
+                'sale_ok': False,
+                'purchase_ok': False,
+                'invoice_policy': 'order',
+            })
+            program.write({'discount_line_product_id': discount_line_product_id.id})
+        return program
 
 class SaleMembershipSaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -41,7 +65,7 @@ class SaleMembershipSaleOrder(models.Model):
             if "interest" in str(order_line.product_id.name).lower():
                 total_interest_fee += order_line.price_subtotal
         self.update({'interest_fee':total_interest_fee,
-                    'amount_untaxed':self.amount_untaxed - total_interest_fee,
+                     'amount_untaxed':self.amount_untaxed - total_interest_fee,
                     })
         return res
 
