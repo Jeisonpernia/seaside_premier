@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
   <data>
-    
+
     <!-- Product Template Form Inherit -->
     <record id="sale_membership_product_template_form_view_inherit" model="ir.ui.view">
       <field name="name">sale.membership.product.template.inherit.form</field>
@@ -12,6 +12,8 @@
           <div>
             <field name="membership"/>
             <label for="membership"/>
+            <field name="is_coupon"/>
+            <label for="is_coupon"/>
           </div>
         </div>
         <field name="categ_id" position="after">
@@ -47,10 +49,14 @@
         <field name="payment_term_id" position="attributes">
           <attribute name="required">1</attribute>
         </field>
-        <group name="sale_total" position="before">
-          <button name="%(interest_breakdown_wizard_action)d" string="Monthly Breakdown"
-            class="oe_highlight" type="action" />
-        </group>
+        <field name="order_line" position="after">
+          <group colspan="2">
+            <div>
+              <button name="%(miscellaneous_fee_wizard_action)d" string="Add Miscellaneous" type="action" />
+              <button name="%(interest_breakdown_wizard_action)d" string="Monthly Breakdown" type="action" />
+            </div>
+          </group>
+        </field>
         <field name="amount_tax" position="after">
           <field name="interest_fee"/>
         </field>

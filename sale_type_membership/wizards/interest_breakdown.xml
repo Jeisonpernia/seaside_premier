@@ -3,28 +3,37 @@
   <data>
 
     <record id="view_interest_breakdown_form" model="ir.ui.view">
-			<field name="name">interest.breakdown.wizard.form</field>
-			<field name="model">interest.breakdown.wizard</field>
-			<field name="type">form</field>
-			<field name="arch" type="xml">
-				<form string="Interest Fee Breakdown">
-          <group name="misc_fee" string="Miscellaneous Fee">
-            <field name="product_amount"/>
-            <field name="misc_rate"/>
-            <field name="misc_fee"/>
-          </group>
+      <field name="name">interest.breakdown.wizard.form</field>
+      <field name="model">interest.breakdown.wizard</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="Interest Fee Breakdown">
           <group name="down_payment" string="Expected Down Payment">
             <field name="no_interest_amount"/>
             <field name="expected_down_payment_select"/>
             <field name="expected_down_payment_percentage"
               attrs="{'invisible':[('expected_down_payment_select','=','fixed')], 'required':[('expected_down_payment_select','=','percentage')]}"/>
-            <field name="expected_down_payment_fixed"/>
+            <field name="expected_down_payment_fixed"
+              attrs="{'invisible':[('expected_down_payment_select','=','percentage')], 'required':[('expected_down_payment_select','=','fixed')]}"/>
           </group>
           <group name="interest" string="Interest Fee">
-            <field name="interest_rate"/>
-            <field name="interest_fee"/>
-            <field name="balance"/>
-            <field name="payment_term_id"/>
+            <group>
+              <field name="interest_rate"/>
+              <field name="interest_fee"/>
+              <field name="balance"/>
+              <field name="payment_term_id"/>
+            </group>
+            <group>
+              <label for="add_vat"/>
+              <div>
+                <field name="add_vat" class="oe_inline"/>
+                <label for="vat_rate" attrs="{'invisible':[('add_vat','!=',True)]}"/>
+                <field name="vat_rate" attrs="{'invisible':[('add_vat','!=',True)]}"/>
+              </div>
+              <field name="vat_type" attrs="{'invisible':[('add_vat','!=',True)]}"/>
+              <field name="vat_amount" attrs="{'invisible':[('add_vat','!=',True)]}"/>
+              <field name="taxed_interest_fee" attrs="{'invisible':[('add_vat','!=',True)]}"/>
+            </group>
           </group>
           <separator string="Schedule of Payment"/>
           <button name="generate_payment_schedule" string="Generate" class="oe_highlight" type="object" />
@@ -37,13 +46,13 @@
               <field name="interest_breakdown_id" invisible="1"/>
             </tree>
           </field>
-				</form>
-				<footer>
-					<button name="create_interest_line" string="Add to Sale Order Line" class="oe_highlight" type="object" />
-					<button special="cancel" string="Cancel" class="oe_link" />
-				</footer>
-			</field>
-		</record>
+        </form>
+        <footer>
+          <button name="create_interest_line" string="Add to Sale Order Line" class="oe_highlight" type="object" />
+          <button special="cancel" string="Cancel" class="oe_link" />
+        </footer>
+      </field>
+    </record>
     <act_window id="interest_breakdown_wizard_action" name="Interest Fee Breakdown"
       res_model="interest.breakdown.wizard" src_model="sale.order"
       view_mode="form" target="new"/>
