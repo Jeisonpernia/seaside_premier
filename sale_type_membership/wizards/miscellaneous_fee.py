@@ -44,23 +44,23 @@ class MiscellaneousFee(models.TransientModel):
                                                                'company_id': False,
                                                                })
         misc_line_found = False
-        for order_line in sale_form.order_line:
-            if "misc" in str(order_line.product_id.name).lower():
-                misc_line_found = True
-                if order_line.price_unit != self.misc_fee:
+        if self.misc_fee != 0.0:
+            for order_line in sale_form.order_line:
+                if "misc" in str(order_line.product_id.name).lower():
+                    misc_line_found = True
                     order_line.update({'price_unit': self.misc_fee,
                                        'price_subtotal': self.misc_fee})
                     break
-        if not misc_line_found:
-            sale_form.write({'order_line':[(0,0,{'name': misc_product.name + "("+str(self.misc_rate)+"%)",
-                                                 'price_unit': self.misc_fee,
-                                                 'product_uom_qty': 1.0,
-                                                 'order_id': sale_form.id,
-                                                 'discount': 0.0,
-                                                 'product_uom': misc_product.uom_id.id,
-                                                 'product_id': misc_product.id,
-                                                 })]
-                             })
-            for order_line in sale_form.order_line:
-                if "misc" in str(order_line.product_id.name).lower():
-                    order_line.update({'price_subtotal': order_line.price_unit})
+            if not misc_line_found:
+                sale_form.write({'order_line':[(0,0,{'name': misc_product.name + "("+str(self.misc_rate)+"%)",
+                                                     'price_unit': self.misc_fee,
+                                                     'product_uom_qty': 1.0,
+                                                     'order_id': sale_form.id,
+                                                     'discount': 0.0,
+                                                     'product_uom': misc_product.uom_id.id,
+                                                     'product_id': misc_product.id,
+                                                     })]
+                                 })
+                for order_line in sale_form.order_line:
+                    if "misc" in str(order_line.product_id.name).lower():
+                        order_line.update({'price_subtotal': order_line.price_unit})
