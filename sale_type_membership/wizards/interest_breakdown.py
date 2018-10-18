@@ -128,30 +128,31 @@ class InterestBreakDown(models.TransientModel):
                                                                    'company_id': False,
                                                                    })
         interest_line_found = False
-        if self.vat_type and self.vat_type == 'exclusive':
-            interest_fee = self.taxed_interest_fee
-        else:
-            interest_fee = self.interest_fee
-        for order_line in sale_form.order_line:
-            if "interest" in str(order_line.product_id.name).lower():
-                interest_line_found = True
-                order_line.update({'price_unit': self.interest_fee,
-                                   'price_subtotal': interest_fee,
-                                   })
-                break
-        if not interest_line_found:
-            sale_form.write({'order_line':[(0,0,{'name': interest_product.name + "("+str(self.interest_rate)+"%)",
-                                                 'price_unit': self.interest_fee,
-                                                 'product_uom_qty': 1.0,
-                                                 'order_id': sale_form.id,
-                                                 'discount': 0.0,
-                                                 'product_uom': interest_product.uom_id.id,
-                                                 'product_id': interest_product.id,
-                                                 })]
-                             })
+        if self.interest_fee != 0.0:
+            if self.vat_type and self.vat_type == 'exclusive':
+                interest_fee = self.taxed_interest_fee
+            else:
+                interest_fee = self.interest_fee
             for order_line in sale_form.order_line:
                 if "interest" in str(order_line.product_id.name).lower():
-                    order_line.update({'price_subtotal': interest_fee})
+                    interest_line_found = True
+                    order_line.update({'price_unit': self.interest_fee,
+                                       'price_subtotal': interest_fee,
+                                       })
+                    break
+            if not interest_line_found:
+                sale_form.write({'order_line':[(0,0,{'name': interest_product.name + "("+str(self.interest_rate)+"%)",
+                                                     'price_unit': self.interest_fee,
+                                                     'product_uom_qty': 1.0,
+                                                     'order_id': sale_form.id,
+                                                     'discount': 0.0,
+                                                     'product_uom': interest_product.uom_id.id,
+                                                     'product_id': interest_product.id,
+                                                     })]
+                                 })
+                for order_line in sale_form.order_line:
+                    if "interest" in str(order_line.product_id.name).lower():
+                        order_line.update({'price_subtotal': interest_fee})
         for ps_lines in sale_form.payment_schedule_ids:
             ps_lines.unlink()
         sale_form.write({'payment_schedule_ids':[(0,0,{'date': ps_lines.date,
