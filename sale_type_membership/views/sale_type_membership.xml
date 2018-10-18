@@ -16,6 +16,9 @@
             <label for="is_coupon"/>
           </div>
         </div>
+        <field name="type" position="after">
+          <field name="layout_categ_id"/>
+        </field>
         <field name="categ_id" position="after">
           <field name="limited"/>
         </field>
@@ -58,7 +61,7 @@
           </group>
         </field>
         <field name="amount_tax" position="after">
-          <field name="interest_fee"/>
+          <field name="interest_fee" invisible="1"/>
         </field>
         <xpath expr="//notebook/page" position="after">
           <page string="Payment Schedule">
