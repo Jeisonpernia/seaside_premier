@@ -11,7 +11,8 @@ class SaleMembershipProductTemplate(models.Model):
     _inherit = 'product.template'
 
     membership = fields.Boolean(string="is a Membership Club")
-    is_coupon = fields.Boolean(string="is a Coupon")
+    is_coupon = fields.Boolean(string="is a Coupon", readonly="1")
+    layout_categ_id = fields.Many2one(string="Section", comodel_name="sale.layout_category")
     limited = fields.Boolean(string="Limited Members")
     limited_max_number = fields.Integer(string="Maximum Number of Members")
     limited_current_number = fields.Integer(string="Current Number of Members", related="sales_count")
@@ -88,6 +89,12 @@ class SaleMembershipSaleOrder(models.Model):
         for order in self:
             order.check_limited_member()
         return res
+
+class SaleMembershipSaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    # overriden layout_category_id to include a related parameter with product_id
+    layout_category_id = fields.Many2one('sale.layout_category', string='Section', related="product_id.layout_categ_id")
 
 class SaleMembershipSalePaymentSchedule(models.Model):
     _name = 'sale.payment.schedule'
