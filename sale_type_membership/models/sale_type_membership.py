@@ -65,9 +65,7 @@ class SaleMembershipSaleOrder(models.Model):
         for order_line in self.order_line:
             if "interest" in str(order_line.product_id.name).lower():
                 total_interest_fee += order_line.price_subtotal
-        self.update({'interest_fee':total_interest_fee,
-                     'amount_untaxed':self.amount_untaxed - total_interest_fee,
-                    })
+        self.update({'interest_fee':total_interest_fee})
         return res
 
     @api.multi
