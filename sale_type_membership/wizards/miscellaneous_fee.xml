@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <record id="view_miscellaneous_fee_form" model="ir.ui.view">
+      <field name="name">miscellaneous.fee.wizard.form</field>
+      <field name="model">miscellaneous.fee.wizard</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="Miscellaneous Fee">
+          <group name="misc_fee" string="Miscellaneous Fee">
+            <field name="product_amount"/>
+            <field name="misc_rate"/>
+            <field name="misc_fee"/>
+          </group>
+        </form>
+        <footer>
+          <button name="create_misc_line" string="Add to Sale Order Line" class="oe_highlight" type="object" />
+          <button special="cancel" string="Cancel" class="oe_link" />
+        </footer>
+      </field>
+    </record>
+    <act_window id="miscellaneous_fee_wizard_action" name="Miscellaneous Fee"
+      res_model="miscellaneous.fee.wizard" src_model="sale.order"
+      view_mode="form" target="new"/>
+
+  </data>
+</odoo>

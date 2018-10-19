@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <data>
+
+    <!-- Sale Order Form Inherit -->
+    <record id="sale_requirements_sale_order_form_inherit" model="ir.ui.view">
+      <field name="name">sale.requirements.sale.order.inherit.form</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_order_form"/>
+      <field name="arch" type="xml">
+        <field name="partner_id" position="after">
+          <field name="product_ids" invisible="1"/>
+          <div>
+            <field name="checklist"/>
+            <label for="checklist" class="oe_inline"/>
+            <field name="checklist_progress" widget="percentpie" attrs="{'invisible':[('checklist','!=',True)]}"/>
+          </div>
+          <field name="checklist_ids" widget="many2many_checkboxes" attrs="{'invisible':[('checklist','!=',True)]}"/>
+        </field>
+      </field>
+    </record>
+
+    <!-- Sale Checklist Tree View -->
+    <record id="sale_requirements_sale_checklist_view_tree" model="ir.ui.view">
+      <field name="name">sale.checklist.items.tree</field>
+      <field name="model">sale.checklist.items</field>
+      <field name="arch" type="xml">
+        <tree string="Sale Checklist" editable="bottom">
+          <field name="name"/>
+          <field name="description"/>
+          <field name="always_required"/>
+          <field name="product_ids" widget="many2many_tags"/>
+          <!-- <field name="model_id"/> -->
+        </tree>
+      </field>
+    </record>
+    <record id="sale_requirements_sale_checklist_action_form" model="ir.actions.act_window">
+      <field name="name">Sale Checklist</field>
+      <field name="res_model">sale.checklist.items</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="menu_sale_requirements_sale_checklist" name="Checklist" parent="sale.menu_sales_config"
+      action="sale_requirements_sale_checklist_action_form"/>
+
+  </data>
+</odoo>
