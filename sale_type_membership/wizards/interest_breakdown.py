@@ -22,9 +22,10 @@ class InterestBreakDown(models.TransientModel):
     payment_schedule_ids = fields.One2many(string="Payment Schedule", comodel_name="payment.schedule.wizard",
                                            inverse_name='interest_breakdown_id', readonly=True)
     add_vat = fields.Boolean(string="Add VAT")
-    vat_rate = fields.Integer(string="VAT(%) =", default=12, readonly=True)
+    tax_id = fields.Many2one(string="VAT Type", comodel_name="account.tax", domain="[('type_tax_use','=','sale')]")
+    vat_rate = fields.Float(string="VAT(%)", related="tax_id.amount")
     vat_type = fields.Selection([('inclusive','Inclusive'),
-                                 ('exclusive','Exclusive')], string="VAT Type",
+                                 ('exclusive','Exclusive')], string="Inclusive/Exclusive", compute="compute_vat_type",
                                 help="Please see in Accounting if VAT is \'Included in Price\'.\n\nVAT Inclusive uses the Interest Fee for the Balance\nVAT Exclusive uses the VATed Interest Fee for the Balance")
     vat_amount = fields.Float(string="VAT Amount",  default=0.0, compute="compute_vat_amount")
     taxed_interest_fee = fields.Float(string="VATed Interest Fee", default=0.0, compute="compute_vat_amount")
@@ -53,6 +54,14 @@ class InterestBreakDown(models.TransientModel):
         if self.interest_rate:
             self.interest_fee = (self.no_interest_amount - self.expected_down_payment_fixed) * (self.interest_rate/100)
 
+    @api.depends('tax_id')
+    def compute_vat_type(self):
+        if self.tax_id:
+            if self.tax_id.price_include:
+                self.vat_type = 'inclusive'
+            else:
+                self.vat_type = 'exclusive'
+
     @api.depends('no_interest_amount','expected_down_payment_fixed','interest_fee','taxed_interest_fee')
     def compute_balance(self):
         for record in self:
@@ -73,6 +82,8 @@ class InterestBreakDown(models.TransientModel):
     @api.onchange('add_vat')
     def onchange_reset_vat_computation(self):
         if not self.add_vat:
+            self.tax_id = False
+            self.vat_rate = 0.0
             self.vat_type = False
             self.vat_amount = 0.0
             self.taxed_interest_fee = 0.0
@@ -129,16 +140,15 @@ class InterestBreakDown(models.TransientModel):
                                                                    })
         interest_line_found = False
         if self.interest_fee != 0.0:
-            if self.vat_type and self.vat_type == 'exclusive':
-                interest_fee = self.taxed_interest_fee
-            else:
-                interest_fee = self.interest_fee
             for order_line in sale_form.order_line:
                 if "interest" in str(order_line.product_id.name).lower():
                     interest_line_found = True
                     order_line.update({'price_unit': self.interest_fee,
-                                       'price_subtotal': interest_fee,
-                                       })
+                                       'name':order_line.name + "(edited)"})
+                    if self.tax_id:
+                        order_line.update({'tax_id': [(6, 0, [self.tax_id.id])]})
+                    else:
+                        order_line.update({'tax_id': False})
                     break
             if not interest_line_found:
                 sale_form.write({'order_line':[(0,0,{'name': interest_product.name + "("+str(self.interest_rate)+"%)",
@@ -151,8 +161,8 @@ class InterestBreakDown(models.TransientModel):
                                                      })]
                                  })
                 for order_line in sale_form.order_line:
-                    if "interest" in str(order_line.product_id.name).lower():
-                        order_line.update({'price_subtotal': interest_fee})
+                    if "interest" in str(order_line.product_id.name).lower() and self.tax_id:
+                        order_line.update({'tax_id': [(6, 0, [self.tax_id.id])]})
         for ps_lines in sale_form.payment_schedule_ids:
             ps_lines.unlink()
         sale_form.write({'payment_schedule_ids':[(0,0,{'date': ps_lines.date,
@@ -161,7 +171,6 @@ class InterestBreakDown(models.TransientModel):
                                                        'sale_order_id': ps_lines.sale_order_id.id,
                                                        })for ps_lines in self.payment_schedule_ids]
                         })
-
 class PaymentSchedule(models.TransientModel):
     _name = 'payment.schedule.wizard'
 
