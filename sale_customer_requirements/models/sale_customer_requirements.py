@@ -12,8 +12,10 @@ class SaleRequirementsSaleOrder(models.Model):
 
     checklist = fields.Boolean(string="Enable Checklist")
     checklist_progress = fields.Float(string="Supplemented", compute="compute_checklist_progress")
+    product_ids = fields.Many2many(string="Products in Order Line", comodel_name="product.product",
+                                   compute="populate_product_ids")
     checklist_ids = fields.Many2many(string="Requirements", comodel_name="sale.checklist.items",
-                                     domain="['|',('product_ids','=',product_id),('always_required','=',True)]")
+                                     domain="['|',('product_ids','in',product_ids),('always_required','=',True)]")
 
     @api.depends('checklist_ids')
     def compute_checklist_progress(self):
@@ -22,6 +24,15 @@ class SaleRequirementsSaleOrder(models.Model):
             cl_len = len(record.checklist_ids)
             if total_len != 0:
                 record.checklist_progress = (cl_len * 100) / total_len
+
+    @api.depends('order_line')
+    def populate_product_ids(self):
+        for rec in self:
+            product_list = []
+            for order_line in rec.order_line:
+                if order_line.product_id.membership:
+                    product_list.append(order_line.product_id.id)
+            rec.product_ids = [(6, 0, product_list)]
 
     @api.multi
     def action_confirm(self):
