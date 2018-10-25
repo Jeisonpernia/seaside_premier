@@ -11,7 +11,7 @@ class MiscellaneousFee(models.TransientModel):
     _name = 'miscellaneous.fee.wizard'
 
     misc_rate = fields.Float(string="Miscellaneous Rate(%)")
-    product_amount = fields.Float(string="Amount", readonly=True)
+    product_amount = fields.Float(string="Net Total List Price", readonly=True)
     misc_fee = fields.Float(string="Miscellaneous Fee")
 
     @api.model
