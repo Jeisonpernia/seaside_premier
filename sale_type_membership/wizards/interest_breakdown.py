@@ -12,18 +12,19 @@ class InterestBreakDown(models.TransientModel):
 
     expected_down_payment_select = fields.Selection([('fixed','Fixed'),
                                                      ('percentage','Percentage')], string="Expected Down Payment", required=True, default='fixed')
-    expected_down_payment_fixed = fields.Float(string="Fixed")
-    expected_down_payment_percentage = fields.Float(string="Percentage(%)")
-    no_interest_amount = fields.Float(string="Total Amount w/o Interest", readonly=True)
+    expected_down_payment_fixed = fields.Float(string="Down Payment Amount", store=True)
+    expected_down_payment_percentage = fields.Float(string="Percentage(%)", help="Based from the Net Total List Price.")
+    product_amount = fields.Float(string="Net Total List Price", readonly=True)
+    no_interest_amount = fields.Float(string="No Interest Amount", readonly=True)
     interest_rate = fields.Float(string="Interest Rate(%)")
     interest_fee = fields.Float(string="Interest Fee")
-    balance = fields.Float(string="Balance", compute="compute_balance")
+    balance = fields.Float(string="Balance", compute="compute_balance", help="Total Package Price deducted by Down Payment.")
     payment_term_id = fields.Many2one(string="Payment Terms", comodel_name="account.payment.term", readonly=True)
     payment_schedule_ids = fields.One2many(string="Payment Schedule", comodel_name="payment.schedule.wizard",
                                            inverse_name='interest_breakdown_id', readonly=True)
-    add_vat = fields.Boolean(string="Add VAT")
+    add_vat = fields.Boolean(string="Add VAT", default=True)
     tax_id = fields.Many2one(string="VAT Type", comodel_name="account.tax", domain="[('type_tax_use','=','sale')]")
-    vat_rate = fields.Float(string="VAT(%)", related="tax_id.amount")
+    vat_rate = fields.Float(string="VAT(%)", related="tax_id.amount", readonly=True)
     vat_type = fields.Selection([('inclusive','Inclusive'),
                                  ('exclusive','Exclusive')], string="Inclusive/Exclusive", compute="compute_vat_type",
                                 help="Please see in Accounting if VAT is \'Included in Price\'.\n\nVAT Inclusive uses the Interest Fee for the Balance\nVAT Exclusive uses the VATed Interest Fee for the Balance")
@@ -34,25 +35,29 @@ class InterestBreakDown(models.TransientModel):
     def default_get(self, vals):
         res = super(InterestBreakDown, self).default_get(vals)
         sale_form = self.env['sale.order'].browse(self._context.get('active_id'))
-        total_interest_subtotal_fee = 0.0
-        total_interest_line_tax = 0.0
+        gross_membership_fee = 0.0
+        coupons = 0.0
         for order_line in sale_form.order_line:
-            if "interest" in str(order_line.product_id.name).lower():
-                total_interest_subtotal_fee += order_line.price_subtotal
-                total_interest_line_tax += order_line.price_tax
-        res.update({'no_interest_amount': sale_form.amount_total - total_interest_subtotal_fee - total_interest_line_tax,
+            if order_line.product_id.membership:
+                gross_membership_fee += order_line.price_subtotal
+            if order_line.product_id.is_coupon:
+                coupons += order_line.price_subtotal
+        res.update({'product_amount': gross_membership_fee + coupons,
+                    'no_interest_amount':sale_form.amount_total,
                     'payment_term_id':sale_form.payment_term_id.id})
         return res
 
     @api.onchange('expected_down_payment_percentage')
     def onchange_fixed_down_payment(self):
-        if self.expected_down_payment_percentage:
-            self.expected_down_payment_fixed = self.no_interest_amount * (self.expected_down_payment_percentage/100)
+        if self.expected_down_payment_percentage != 0.0:
+            self.expected_down_payment_fixed = self.product_amount * (self.expected_down_payment_percentage/100)
+        else:
+            self.expected_down_payment_fixed = 0.0
 
     @api.onchange('interest_rate')
     def onchange_interest_fee(self):
         if self.interest_rate:
-            self.interest_fee = (self.no_interest_amount - self.expected_down_payment_fixed) * (self.interest_rate/100)
+            self.interest_fee = (self.product_amount - self.expected_down_payment_fixed) * (self.interest_rate/100)
 
     @api.depends('tax_id')
     def compute_vat_type(self):
@@ -62,11 +67,11 @@ class InterestBreakDown(models.TransientModel):
             else:
                 self.vat_type = 'exclusive'
 
-    @api.depends('no_interest_amount','expected_down_payment_fixed','interest_fee','taxed_interest_fee')
+    @api.depends('product_amount','expected_down_payment_fixed','interest_fee','taxed_interest_fee')
     def compute_balance(self):
         for record in self:
             interest_fee = max(record.interest_fee, record.taxed_interest_fee)
-            if record.no_interest_amount:
+            if record.product_amount:
                 record.balance = record.no_interest_amount - record.expected_down_payment_fixed + interest_fee
 
     @api.depends('vat_type','interest_fee')
@@ -171,6 +176,7 @@ class InterestBreakDown(models.TransientModel):
                                                        'sale_order_id': ps_lines.sale_order_id.id,
                                                        })for ps_lines in self.payment_schedule_ids]
                         })
+
 class PaymentSchedule(models.TransientModel):
     _name = 'payment.schedule.wizard'
 

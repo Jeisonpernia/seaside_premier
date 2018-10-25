@@ -9,26 +9,30 @@
       <field name="arch" type="xml">
         <form string="Interest Fee Breakdown">
           <group name="down_payment" string="Expected Down Payment">
-            <field name="no_interest_amount"/>
+            <field name="product_amount"/>
+            <field name="no_interest_amount" invisible="1"/>
             <field name="expected_down_payment_select"/>
             <field name="expected_down_payment_percentage"
               attrs="{'invisible':[('expected_down_payment_select','=','fixed')], 'required':[('expected_down_payment_select','=','percentage')]}"/>
             <field name="expected_down_payment_fixed"
-              attrs="{'invisible':[('expected_down_payment_select','=','percentage')], 'required':[('expected_down_payment_select','=','fixed')]}"/>
+              attrs="{'required':[('expected_down_payment_select','=','fixed')]}"/>
           </group>
           <group name="interest" string="Interest Fee">
             <group>
+              <field name="payment_term_id"/>
               <field name="interest_rate"/>
               <field name="interest_fee"/>
-              <field name="balance"/>
-              <field name="payment_term_id"/>
+              <div>
+                <label string="Balance" style="font-weight: bold" attrs="{'invisible':[('add_vat','=',True)]}"/>
+                <label string="Balance with VATed Interest" style="font-weight: bold" attrs="{'invisible':[('add_vat','!=',True)]}"/>
+              </div>
+              <field name="balance" nolabel="1"/>
             </group>
             <group>
               <label for="add_vat"/>
               <div>
                 <field name="add_vat" class="oe_inline"/>
               </div>
-              <!--  -->
               <field name="tax_id" attrs="{'invisible':[('add_vat','!=',True)]}"/>
               <field name="vat_rate" attrs="{'invisible':[('add_vat','!=',True)]}"/>
               <field name="vat_type" attrs="{'invisible':[('add_vat','!=',True)]}"/>
@@ -42,7 +46,7 @@
             <tree>
               <field name="date"/>
               <field name="name"/>
-              <field name="payments"/>
+              <field name="payments" sum="Total Payment/s"/>
               <field name="sale_order_id" invisible="1"/>
               <field name="interest_breakdown_id" invisible="1"/>
             </tree>
