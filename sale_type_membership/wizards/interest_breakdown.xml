@@ -33,7 +33,6 @@
               <div>
                 <field name="add_vat" class="oe_inline"/>
               </div>
-              <!--  -->
               <field name="tax_id" attrs="{'invisible':[('add_vat','!=',True)]}"/>
               <field name="vat_rate" attrs="{'invisible':[('add_vat','!=',True)]}"/>
               <field name="vat_type" attrs="{'invisible':[('add_vat','!=',True)]}"/>
