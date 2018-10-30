@@ -26,5 +26,8 @@ class SaleAdvancePaymentInv(models.TransientModel):
                         'percentage': commission.percentage}))
                 invoice.write({'sale_commission_percentage_ids': sale_commission_lines})
             for line in invoice.invoice_line_ids:
+                if line.product_id and (line.product_id.name).lower() in ['down payment','down-payment','downpayment']:
+                    line.product_id.write({'lst_price':line.price_unit,
+                                           'description_sale':line.name})
                 line._onchange_product_id()
         return invoice
