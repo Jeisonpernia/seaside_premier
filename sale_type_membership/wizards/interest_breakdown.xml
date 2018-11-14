@@ -9,8 +9,8 @@
       <field name="arch" type="xml">
         <form string="Interest Fee Breakdown">
           <group name="down_payment" string="Expected Down Payment">
+            <field name="no_interest_amount"/>
             <field name="product_amount"/>
-            <field name="no_interest_amount" invisible="1"/>
             <field name="expected_down_payment_select"/>
             <field name="expected_down_payment_percentage"
               attrs="{'invisible':[('expected_down_payment_select','=','fixed')], 'required':[('expected_down_payment_select','=','percentage')]}"/>
