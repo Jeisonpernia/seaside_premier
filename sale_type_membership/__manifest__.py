@@ -20,6 +20,7 @@
         ],
 
     'data': [
+        'security/ir.model.access.csv',
         'wizards/interest_breakdown.xml',
         'wizards/miscellaneous_fee.xml',
         'views/sale_type_membership.xml',
